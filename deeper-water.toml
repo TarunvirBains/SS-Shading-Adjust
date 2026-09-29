@@ -13,6 +13,7 @@
 # sits at 0.70-0.80 (Zora's Domain falls, Forest Temple wells, Ice Cavern puddles).
 max_alpha = 0.70
 mapping = "proportional"
+a_max = 0.50
 # a_max (the opacity that maps to max_alpha) is measured: the most opaque patched water below
 # max_alpha. Water already at or above max_alpha (within half a percent) keeps its value and
 # never sets the scale: the Ice Cavern and Forest Temple wells at 0.80, Zora's Domain's falls at
