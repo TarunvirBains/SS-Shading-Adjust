@@ -1,0 +1,13 @@
+[package]
+name = "oot-deeper-water"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+description = "Deeper, more opaque water surfaces for Ship of Harkinian: patched display lists in a .o2r"
+
+[dependencies]
+anyhow = "1.0.104"
+clap = { version = "4.6.7", features = ["derive"] }
+serde = { version = "1.0.229", features = ["derive"] }
+toml = "1.1.6"
+zip = { version = "8.6.0", default-features = false, features = ["deflate"] }
