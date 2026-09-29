@@ -2,12 +2,12 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
-use oot_deeper_water::config::Config;
-use oot_deeper_water::o2r::{self, Archive};
-use oot_deeper_water::water;
+use ss_shading_adjust::config::Config;
+use ss_shading_adjust::o2r::{self, Archive};
+use ss_shading_adjust::water;
 
 #[derive(Parser)]
-#[command(name = "oot-deeper-water", version, about)]
+#[command(name = "ss-shading-adjust", version, about)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -57,7 +57,7 @@ fn main() -> ExitCode {
 fn run(cli: Cli) -> anyhow::Result<ExitCode> {
     match cli.command {
         Command::Audit { game, config, all } => {
-            let config = Config::load(&config)?;
+            let config = Config::load(&config)?.water;
             let mut archive = Archive::open(&game)?;
             let a_max = water::a_max(&mut archive, &config)?;
             let rows =
@@ -124,7 +124,7 @@ fn run(cli: Cli) -> anyhow::Result<ExitCode> {
             output,
             config,
         } => {
-            let config = Config::load(&config)?;
+            let config = Config::load(&config)?.water;
             let mut archive = Archive::open(&game)?;
             let (entries, changes, a_max) = water::build(&mut archive, &config)?;
             println!("a_max {a_max:.3}, scale {:.3}", config.scale(a_max));
@@ -147,7 +147,7 @@ fn run(cli: Cli) -> anyhow::Result<ExitCode> {
             Ok(ExitCode::SUCCESS)
         }
         Command::Conflicts { other, config } => {
-            let config = Config::load(&config)?;
+            let config = Config::load(&config)?.water;
             let archive = Archive::open(&other)?;
             let mut n = 0;
             for s in &config.surfaces {

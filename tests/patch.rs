@@ -4,10 +4,10 @@
 
 use std::collections::HashSet;
 
-use oot_deeper_water::config::{Config, Mapping, Surface};
-use oot_deeper_water::crc64::crc64;
-use oot_deeper_water::dl::{self, Cmd};
-use oot_deeper_water::water::patch_dl;
+use ss_shading_adjust::config::{Mapping, Surface, Water};
+use ss_shading_adjust::crc64::crc64;
+use ss_shading_adjust::dl::{self, Cmd};
+use ss_shading_adjust::water::patch_dl;
 
 const WATER: &str = "scenes/shared/test_scene/test_room_0Tex_000000";
 const ROCK: &str = "scenes/shared/test_scene/test_room_0Tex_001000";
@@ -71,8 +71,8 @@ fn display_list() -> Vec<u8> {
     dl::encode(&header, &cmds)
 }
 
-fn config(max_alpha: f32) -> Config {
-    Config {
+fn config(max_alpha: f32) -> Water {
+    Water {
         max_alpha,
         mapping: Mapping::Proportional,
         a_max: None,
@@ -171,7 +171,7 @@ fn configs_reject_limits_above_max_alpha() {
         ..surface(None)
     });
     assert!(c.validate().is_err());
-    let c: Result<Config, _> =
+    let c: Result<Water, _> =
         toml::from_str("max_alpha = 0.7\nmapping = 'linear'\nwater_textures = []");
     assert!(c.is_err());
 }
@@ -182,7 +182,7 @@ fn every_display_list_of_a_game_archive_round_trips() {
         eprintln!("OOT_O2R not set: skipped");
         return;
     };
-    let mut archive = oot_deeper_water::o2r::Archive::open(std::path::Path::new(&path)).unwrap();
+    let mut archive = ss_shading_adjust::o2r::Archive::open(std::path::Path::new(&path)).unwrap();
     let mut n = 0;
     for name in archive.names() {
         let bytes = archive.read(&name).unwrap();

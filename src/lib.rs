@@ -1,7 +1,7 @@
-//! OoT Deeper Water: raises the opacity of Ocarina of Time's translucent water surfaces for Ship
-//! of Harkinian by shipping patched display-list resources in a `.o2r` mod. Only the alpha byte
-//! of the water materials' primitive color changes; an opacity cap and per-surface values keep
-//! swimming, diving and iron-boots sections readable.
+//! SS Shading Adjust: engine-side look adjustments for Ship of Harkinian (Ocarina of Time), in
+//! the direction of Skyward Sword, shipped as patched game resources in a `.o2r` mod. `water`:
+//! deeper water (only the alpha byte of the water materials' primitive color changes; an opacity
+//! limit and per-surface values keep swimming, diving and iron-boots sections readable).
 
 pub mod config;
 pub mod crc64;

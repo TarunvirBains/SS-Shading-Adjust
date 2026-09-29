@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 
 use anyhow::{Result, bail, ensure};
 
-use crate::config::Config;
+use crate::config::Water;
 use crate::crc64::crc64;
 use crate::dl;
 use crate::o2r::Archive;
@@ -112,7 +112,7 @@ pub fn patch_dl(
 
 /// The opacity that maps to `max_alpha`: the config's `a_max`, else the most opaque water
 /// material of the configured surfaces below `max_alpha` (water at or above it never sets it).
-pub fn a_max(archive: &mut Archive, config: &Config) -> Result<f32> {
+pub fn a_max(archive: &mut Archive, config: &Water) -> Result<f32> {
     if let Some(a) = config.a_max {
         return Ok(a);
     }
@@ -135,7 +135,7 @@ pub fn a_max(archive: &mut Archive, config: &Config) -> Result<f32> {
 pub type Entries = Vec<(String, Vec<u8>)>;
 
 /// The mod's entries: every configured surface's display list, patched. Also returns `a_max`.
-pub fn build(archive: &mut Archive, config: &Config) -> Result<(Entries, Vec<Change>, f32)> {
+pub fn build(archive: &mut Archive, config: &Water) -> Result<(Entries, Vec<Change>, f32)> {
     let a_max = a_max(archive, config)?;
     let water = water_set(&config.water_textures);
     let (mut entries, mut all) = (Vec::new(), Vec::new());

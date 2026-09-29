@@ -1,21 +1,40 @@
-//! The water config: which textures are water, the opacity mapping and its limit, and the
-//! patched surfaces.
+//! The config file (`ss-shading-adjust.toml`), one section per adjustment.
 //!
-//! Every patched water material's opacity `a` (its primitive alpha) is scaled proportionally,
-//! `a * max_alpha / a_max`, where `a_max` is the most opaque patched water: every surface gets
-//! more opaque, the ratios between surfaces (the water's dynamic range) stay, and the most
-//! opaque water lands on `max_alpha`. Water already at or above `max_alpha` keeps its own
-//! value; nothing is ever made less opaque. A surface's own `max_alpha` (gameplay visibility)
-//! caps its result.
+//! `[water]`: which textures are water, the opacity mapping and its limit, and the patched
+//! surfaces. Every patched water material's opacity `a` (its primitive alpha) is scaled
+//! proportionally, `a * max_alpha / a_max`: every surface gets more opaque, the ratios between
+//! surfaces (the water's dynamic range) stay, and water as opaque as `a_max` lands on
+//! `max_alpha`. Water already at or above `max_alpha` keeps its own value; nothing is ever made
+//! less opaque. A surface's own `max_alpha` (gameplay visibility) caps its result.
 
 use std::path::Path;
 
 use anyhow::{Context, Result, ensure};
 use serde::Deserialize;
 
+/// The config file.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Config {
+    /// Water opacity (`[water]`).
+    pub water: Water,
+}
+
+impl Config {
+    pub fn load(path: &Path) -> Result<Self> {
+        let text =
+            std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
+        let c: Self =
+            toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))?;
+        c.water.validate()?;
+        Ok(c)
+    }
+}
+
+/// `[water]`.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Water {
     /// The most opaque any water becomes (0..1); per-surface limits may only be lower.
     pub max_alpha: f32,
     pub mapping: Mapping,
@@ -50,16 +69,7 @@ pub struct Surface {
     pub reason: String,
 }
 
-impl Config {
-    pub fn load(path: &Path) -> Result<Self> {
-        let text =
-            std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
-        let c: Self =
-            toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))?;
-        c.validate()?;
-        Ok(c)
-    }
-
+impl Water {
     pub fn validate(&self) -> Result<()> {
         ensure!(
             self.max_alpha > 0.0 && self.max_alpha <= 1.0,

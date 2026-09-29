@@ -1,9 +1,9 @@
 [package]
-name = "oot-deeper-water"
+name = "ss-shading-adjust"
 version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-description = "Deeper, more opaque water surfaces for Ship of Harkinian: patched display lists in a .o2r"
+description = "Skyward-Sword-like engine-side look adjustments for Ship of Harkinian (OoT): patched game resources in a .o2r"
 
 [dependencies]
 anyhow = "1.0.104"
