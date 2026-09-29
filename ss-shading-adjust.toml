@@ -487,3 +487,60 @@ textures = [
     "scenes/shared/spot04_scene/spot04_room_1Tex_007D78",
 ]
 texture_lightness = 0.845
+
+# [lava] Lava glow: Skyward Sword's Eldin lava glows orange-yellow with bright veins; Ocarina of
+# Time's lava materials draw a deep red texture (OoT Reloaded: L 0.36, C 0.15, h 29) times the
+# vertex colors (baked light, near white) or the scene's environment color, and read flat. The
+# lava materials' combiner gains an additive glow after the lighting term: red moves toward
+# orange, the veins toward yellow, and every shading difference (vertex light, the animated
+# crust blend, the crater's pulsing environment color) stays. Rock and platforms are other
+# materials and are untouched, so lava versus rock stays obvious. The textures stay as the
+# texture pack (and PastelPlash, which keeps lava's glow and heat colors) made them.
+[lava]
+enabled = true
+# The glow at strength 1 (0..1 per channel, as the combiner adds it); strength scales it.
+glow = [0.30, 0.24, 0.02]
+strength = 0.7
+
+[[lava.scene]]
+name = "Fire Temple"
+dls = "scenes/nonmq/HIDAN_scene/*DL_*"
+textures = [
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_1Tex_00C130",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_2Tex_00E428",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_6Tex_006790",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_8Tex_0092D8",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_10Tex_017018",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_16Tex_009DE0",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_21Tex_007478",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_21Tex_007C78",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_24Tex_004D38",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_26Tex_005898",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_26Tex_006098",
+]
+
+[[lava.scene]]
+name = "Volvagia's arena"
+dls = "scenes/shared/FIRE_bs_scene/*DL_*"
+textures = [
+    "scenes/shared/FIRE_bs_scene/FIRE_bs_room_1Tex_0065D8",
+    "scenes/shared/FIRE_bs_scene/FIRE_bs_sceneTex_003C00",
+]
+
+[[lava.scene]]
+name = "Death Mountain Crater"
+dls = "scenes/shared/spot17_scene/*DL_*"
+textures = [
+    "scenes/shared/spot17_scene/spot17_room_1Tex_00CBD8",
+    "scenes/shared/spot17_scene/spot17_room_1Tex_00D3D8",
+]
+
+[[lava.scene]]
+name = "Dodongo's Cavern"
+dls = "scenes/nonmq/ddan_scene/*DL_*"
+textures = ["scenes/nonmq/ddan_scene/ddan_room_16Tex_002158"]
+
+[[lava.scene]]
+name = "King Dodongo's arena"
+dls = "scenes/shared/ddan_boss_scene/*DL_*"
+textures = ["scenes/shared/ddan_boss_scene/gDodongosCavernBossLavaFloorTex"]

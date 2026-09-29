@@ -43,6 +43,16 @@ enum Command {
         /// Display-list path glob (`*` within a segment, `**` across).
         glob: String,
     },
+    /// Vertex colors of the unlit materials drawing given textures: per vertex array, how many
+    /// vertices only they draw, how many are shared, and the OKLCH of the exclusive ones.
+    VtxAudit {
+        /// Game archive; only read.
+        game: PathBuf,
+        /// Display-list path glob.
+        dls: String,
+        /// Texture resource paths.
+        textures: Vec<String>,
+    },
     /// Report which resources of a built mod other mods also replace (same path, or its `alt/`
     /// variant).
     Conflicts {
@@ -205,6 +215,56 @@ fn run(cli: Cli) -> anyhow::Result<ExitCode> {
                     );
                 }
             }
+            if let Some(l) = full.lava.as_ref().filter(|l| l.enabled) {
+                let names = archive.names();
+                for scene in l.scenes.iter().filter(|s| s.enabled) {
+                    let lava = ss_shading_adjust::lava::texture_set(scene);
+                    let (mut patched, mut skipped) = (0, 0);
+                    for name in names
+                        .iter()
+                        .filter(|n| ss_shading_adjust::glob::matches(&scene.dls, n))
+                    {
+                        let bytes = match entries.get(name) {
+                            Some(b) => b.clone(),
+                            None => archive.read(name)?,
+                        };
+                        if !ss_shading_adjust::dl::is_dl(&bytes) {
+                            continue;
+                        }
+                        let (out, changes) =
+                            ss_shading_adjust::lava::patch_dl(name, &bytes, &lava, l.prim())?;
+                        for c in &changes {
+                            println!(
+                                "lava {}: {} combine @{:#x} prim @{:#x} {:?} ({} tris){}",
+                                scene.name,
+                                c.dl,
+                                c.combine,
+                                c.prim,
+                                c.form,
+                                c.tris,
+                                if c.skipped.is_empty() {
+                                    String::new()
+                                } else {
+                                    format!(" SKIPPED: {}", c.skipped)
+                                }
+                            );
+                            if c.skipped.is_empty() {
+                                patched += 1;
+                            } else {
+                                skipped += 1;
+                            }
+                        }
+                        if out != bytes {
+                            entries.insert(name.clone(), out);
+                        }
+                    }
+                    println!(
+                        "lava {}: {patched} materials patched, {skipped} skipped (glow {:08x})",
+                        scene.name,
+                        l.prim()
+                    );
+                }
+            }
             let entries: Vec<(String, Vec<u8>)> = entries.into_iter().collect();
             o2r::write(&output, &entries)?;
             println!("{} resources -> {}", entries.len(), output.display());
@@ -259,6 +319,61 @@ fn run(cli: Cli) -> anyhow::Result<ExitCode> {
                             .join(" ")
                     );
                 }
+            }
+            Ok(ExitCode::SUCCESS)
+        }
+        Command::VtxAudit {
+            game,
+            dls,
+            textures,
+        } => {
+            use ss_shading_adjust::{dl, glob, ground, vtx};
+            let mut archive = Archive::open(&game)?;
+            let names = water::names_by_hash(&archive);
+            let targets: std::collections::HashSet<u64> = textures
+                .iter()
+                .map(|t| ss_shading_adjust::crc64::crc64(t))
+                .collect();
+            let is_target = |tex: &[u64], lit: Option<bool>| {
+                lit == Some(false) && tex.iter().any(|t| targets.contains(t))
+            };
+            let mut uses = std::collections::HashMap::new();
+            for name in archive.names().iter().filter(|n| glob::matches(&dls, n)) {
+                let bytes = archive.read(name)?;
+                if dl::is_dl(&bytes) {
+                    vtx::mark(&dl::parse(&bytes)?, &is_target, &mut uses);
+                }
+            }
+            let mut per: std::collections::BTreeMap<u64, (usize, usize)> = Default::default();
+            for (&(h, _), u) in &uses {
+                let e = per.entry(h).or_default();
+                if u.target && !u.other {
+                    e.0 += 1;
+                } else if u.target {
+                    e.1 += 1;
+                }
+            }
+            let exclusive = vtx::exclusive(&uses);
+            println!("array\texclusive\tshared\tL\tC\thue");
+            for (h, (ex, sh)) in per.iter().filter(|(_, (e, s))| e + s > 0) {
+                let name = names.get(h).cloned().unwrap_or_else(|| format!("{h:016x}"));
+                let (mut sl, mut sa, mut sb, mut n) = (0.0f32, 0.0f32, 0.0f32, 0.0f32);
+                if let Some(idx) = exclusive.get(h) {
+                    let bytes = archive.read(&name)?;
+                    for &i in idx {
+                        let c = vtx::color(&bytes, i);
+                        let lab =
+                            ground::srgb_to_oklab([c[0], c[1], c[2]].map(|v| v as f32 / 255.0));
+                        (sl, sa, sb, n) = (sl + lab[0], sa + lab[1], sb + lab[2], n + 1.0);
+                    }
+                }
+                let n = n.max(1.0);
+                println!(
+                    "{name}\t{ex}\t{sh}\t{:.3}\t{:.3}\t{:.0}",
+                    sl / n,
+                    (sa / n).hypot(sb / n),
+                    (sb / n).atan2(sa / n).to_degrees().rem_euclid(360.0)
+                );
             }
             Ok(ExitCode::SUCCESS)
         }

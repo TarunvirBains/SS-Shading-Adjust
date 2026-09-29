@@ -20,6 +20,8 @@ pub struct Config {
     pub water: Water,
     /// Ground tint (`[ground]`).
     pub ground: Option<crate::ground::Ground>,
+    /// Lava glow (`[lava]`).
+    pub lava: Option<crate::lava::Lava>,
 }
 
 impl Config {
@@ -31,6 +33,9 @@ impl Config {
         c.water.validate()?;
         if let Some(g) = &c.ground {
             g.validate()?;
+        }
+        if let Some(l) = &c.lava {
+            l.validate()?;
         }
         Ok(c)
     }

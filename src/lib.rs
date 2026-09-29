@@ -8,6 +8,8 @@ pub mod crc64;
 pub mod dl;
 pub mod glob;
 pub mod ground;
+pub mod lava;
 pub mod material;
 pub mod o2r;
+pub mod vtx;
 pub mod water;

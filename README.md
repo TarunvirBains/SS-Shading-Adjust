@@ -4,7 +4,8 @@ Engine-side look adjustments for Ship of Harkinian (Ocarina of Time), in the dir
 Skyward Sword. It ships patched copies of game resources (display lists) in a small `.o2r`
 mod; every patch changes only the bytes it names. Texture restyling is a separate tool.
 
-The adjustments live in `ss-shading-adjust.toml`, one section each.
+The adjustments live in `ss-shading-adjust.toml`, one section each; `[ground]` and `[lava]`
+have an `enabled` switch, a `strength` and one toggle per area. The mod never ships textures.
 
 ## `[water]`: deeper water
 
@@ -31,6 +32,14 @@ OKLab lightness is kept (paths stay as light as vanilla under every light and ti
 earth material drawn another way, is left alone and reported. Each area is a `[[ground.scene]]`
 toggle.
 
+## `[lava]`: lava glow
+
+The lava materials (Fire Temple, Volvagia's arena, Death Mountain Crater; Dodongo's Cavern's
+lava shares its combiner with the rock and is left alone) gain an additive glow after the
+lighting term: the red lava moves toward Skyward Sword's orange, the veins toward yellow, and
+every shading difference stays. Only combiner and primitive-color commands the lava uses alone
+change; the lava textures stay as the texture pack made them. `strength` scales the glow.
+
 ## Use
 
 ```sh
@@ -38,6 +47,7 @@ cargo build --release --locked
 ss-shading-adjust audit     oot.o2r --config ss-shading-adjust.toml   # water materials, TSV
 ss-shading-adjust build     oot.o2r SS-Shading-Adjust.o2r --config ss-shading-adjust.toml
 ss-shading-adjust materials oot.o2r 'scenes/shared/spot04_scene/*DL_*'    # render state per material
+ss-shading-adjust vtx-audit oot.o2r 'scenes/nonmq/HIDAN_scene/*DL_*' TEXTURE...   # vertex colors
 ss-shading-adjust conflicts SS-Shading-Adjust.o2r other-mod.o2r ...
 ```
 
