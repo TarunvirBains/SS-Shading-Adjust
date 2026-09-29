@@ -21,13 +21,24 @@ materials' primitive color changes.
   Ground's diving room, the Lakeside Laboratory tank and the fishing pond keep their vanilla
   water.
 
+## `[ground]`: ground tint
+
+Kokiri Forest's paths are gray textures times the scene lighting times an olive primitive
+color. Earth materials of the form `texture × shade × PRIM` get a warm terracotta primitive
+color instead, in the direction of Skyward Sword's Faron Woods: only its RGB bytes change, its
+OKLab lightness is kept (paths stay as light as vanilla under every light and time of day),
+`strength` sets how far the hue moves. A primitive color shared with non-earth materials, or an
+earth material drawn another way, is left alone and reported. Each area is a `[[ground.scene]]`
+toggle.
+
 ## Use
 
 ```sh
 cargo build --release --locked
 ss-shading-adjust audit     oot.o2r --config ss-shading-adjust.toml   # water materials, TSV
 ss-shading-adjust build     oot.o2r SS-Shading-Adjust.o2r --config ss-shading-adjust.toml
-ss-shading-adjust conflicts other-mod.o2r --config ss-shading-adjust.toml
+ss-shading-adjust materials oot.o2r 'scenes/shared/spot04_scene/*DL_*'    # render state per material
+ss-shading-adjust conflicts SS-Shading-Adjust.o2r other-mod.o2r ...
 ```
 
 The game archive is only read. Put `SS-Shading-Adjust.o2r` in SoH's `mods` folder. It replaces

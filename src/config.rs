@@ -18,6 +18,8 @@ use serde::Deserialize;
 pub struct Config {
     /// Water opacity (`[water]`).
     pub water: Water,
+    /// Ground tint (`[ground]`).
+    pub ground: Option<crate::ground::Ground>,
 }
 
 impl Config {
@@ -27,6 +29,9 @@ impl Config {
         let c: Self =
             toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))?;
         c.water.validate()?;
+        if let Some(g) = &c.ground {
+            g.validate()?;
+        }
         Ok(c)
     }
 }

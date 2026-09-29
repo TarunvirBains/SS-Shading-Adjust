@@ -6,5 +6,8 @@
 pub mod config;
 pub mod crc64;
 pub mod dl;
+pub mod glob;
+pub mod ground;
+pub mod material;
 pub mod o2r;
 pub mod water;

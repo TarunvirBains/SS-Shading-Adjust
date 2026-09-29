@@ -456,3 +456,34 @@ reason = "grotto pools (one hides a heart piece under water): lower"
 [[water.surface]]
 dl = "scenes/shared/souko_scene/souko_room_1DL_009B08"
 reason = "shallow decorative water"
+
+# [ground] Ground tint: Skyward Sword's Faron Woods reads its paths as warm terracotta; OoT's
+# Kokiri Forest paths are gray textures times the scene lighting times an olive primitive color
+# (9b8c34). Earth materials of the form texture x shade x PRIM get a warmer primitive color: its
+# OKLab lightness is kept exactly (the path stays as light as vanilla, under every light and time
+# of day) and its a/b move toward the target, `strength` of the way. Nothing else changes.
+#
+# Target: hue 50 (terracotta, between the brief's rose-sienna 40-50 and the terracotta mock the
+# user liked, mock-a.png: paths h 58-61, C 0.08-0.09 on screen); on-screen chroma 0.085 (the mock;
+# SS Faron earth measures C 0.07-0.08 at h 61-63). Strength: test builds a = 0.5, b = 0.85.
+[ground]
+enabled = true
+target_hue = 50.0
+target_chroma = 0.085
+strength = 0.5
+
+# Kokiri Forest (spot04): the paths and bare earth. Materials: 019A90 and 019290 (room 0),
+# 00F218 (scene), 007D78 (room 1), all texture x shade x PRIM with PRIM 9b8c34 (00F218: also
+# 826e3c). Not earth: 014B08 (clover ground, the grass), 01A290 (black/white fade), 01A490/
+# 01AC90/01AE90 (the painted decals). texture_lightness: the PastelPlash v6c textures (gray, L
+# p50 0.845).
+[[ground.scene]]
+name = "Kokiri Forest"
+dls = "scenes/shared/spot04_scene/*DL_*"
+textures = [
+    "scenes/shared/spot04_scene/spot04_room_0Tex_019A90",
+    "scenes/shared/spot04_scene/spot04_room_0Tex_019290",
+    "scenes/shared/spot04_scene/spot04_sceneTex_00F218",
+    "scenes/shared/spot04_scene/spot04_room_1Tex_007D78",
+]
+texture_lightness = 0.845
