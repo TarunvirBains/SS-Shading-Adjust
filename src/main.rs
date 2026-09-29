@@ -67,20 +67,50 @@ fn run(cli: Cli) -> anyhow::Result<ExitCode> {
                 config.scale(a_max),
                 config.max_alpha
             );
-            println!("dl\toffset\tcurrent\tmapped\tfinal\twater\treason\ttextures");
+            if let Some(m) = rows.iter().filter(|m| m.water).max_by_key(|m| m.alpha) {
+                println!(
+                    "# most opaque water: {} @{:#x}, alpha {:.3} ({}/255)",
+                    m.dl,
+                    m.offset,
+                    m.alpha as f32 / 255.0,
+                    m.alpha
+                );
+            }
+            println!("dl\toffset\tcurrent\tmapped\tfinal\tstatus\twater\treason\ttextures");
             for m in rows.iter().filter(|m| all || m.water) {
                 let a = m.alpha as f32 / 255.0;
                 let surface = config.surfaces.iter().find(|s| s.dl == m.dl);
-                let (mapped, fin, reason) = match surface {
-                    Some(s) if m.water => (
-                        format!("{:.2}", config.mapped(a, a_max)),
-                        format!("{:.2}", config.target(s, m.alpha, a_max) as f32 / 255.0),
-                        s.reason.as_str(),
+                let (mapped, fin, status, reason) = match surface {
+                    Some(s) if m.water => {
+                        let (mapped, fin) =
+                            (config.mapped(a, a_max), config.target(s, m.alpha, a_max));
+                        let status = if config.at_or_above_max(a) {
+                            "unchanged: at or above max_alpha"
+                        } else if (fin as f32 / 255.0) < mapped - 0.5 / 255.0 {
+                            "limited (gameplay)"
+                        } else {
+                            "mapped"
+                        };
+                        (
+                            format!("{mapped:.2}"),
+                            format!("{:.2}", fin as f32 / 255.0),
+                            status,
+                            s.reason.as_str(),
+                        )
+                    }
+                    _ => (
+                        "-".to_string(),
+                        format!("{a:.2}"),
+                        "not patched",
+                        if config.at_or_above_max(a) && m.water {
+                            "at or above max_alpha"
+                        } else {
+                            "-"
+                        },
                     ),
-                    _ => ("-".to_string(), format!("{a:.2}"), "not patched"),
                 };
                 println!(
-                    "{}\t{:#x}\t{a:.2}\t{mapped}\t{fin}\t{}\t{reason}\t{}",
+                    "{}\t{:#x}\t{a:.2}\t{mapped}\t{fin}\t{status}\t{}\t{reason}\t{}",
                     m.dl,
                     m.offset,
                     if m.water { "water" } else { "-" },

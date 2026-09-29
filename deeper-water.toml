@@ -13,13 +13,12 @@
 # sits at 0.70-0.80 (Zora's Domain falls, Forest Temple wells, Ice Cavern puddles).
 max_alpha = 0.70
 mapping = "proportional"
-# The opacity that maps to max_alpha. Most of the game's water sits at 0.39-0.50 (the Kokiri pond
-# 0.39, Hyrule Field and Zora's River 0.40, the Deku Tree, Zora's Fountain and the grottos 0.50):
-# a_max 0.50 lifts them by 1.4x with their ratios kept (pond 0.39 -> 0.55). The few waters
-# between 0.50 and 0.70 (castle moats 0.60, Lake Hylia's second layer 0.63, the oasis 0.65) reach
-# max_alpha. Unset, a_max is the most opaque patched water below max_alpha, which is 0.70 itself
-# (Zora's Domain falls): the scale would be 1.0 and nothing would change.
-a_max = 0.50
+# a_max (the opacity that maps to max_alpha) is measured: the most opaque patched water below
+# max_alpha. Water already at or above max_alpha (within half a percent) keeps its value and
+# never sets the scale: the Ice Cavern and Forest Temple wells at 0.80, Zora's Domain's falls at
+# 0.70. In oot.o2r that leaves the Desert Colossus oasis at 0.65: scale 1.08 (pond 0.39 -> 0.42).
+# Set `a_max` here to lift more, e.g. a_max = 0.50 (most water sits at 0.39-0.50): scale 1.40,
+# pond 0.39 -> 0.55, everything from 0.50 up at 0.70.
 
 # Texture resource paths that are water (from the fluid audit of the texture pack plus the
 # translucent materials of oot.o2r labeled by eye). A material drawing one of these is a water

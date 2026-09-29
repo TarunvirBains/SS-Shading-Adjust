@@ -98,10 +98,25 @@ impl Config {
         }
     }
 
+    /// Whether water of opacity `a` is already at or above `max_alpha` (within half a percent,
+    /// the precision of an alpha byte): it keeps its own value and never sets the scale.
+    pub fn at_or_above_max(&self, a: f32) -> bool {
+        a >= self.threshold()
+    }
+
+    /// `max_alpha` less half a percent (the precision of an alpha byte): water at or above it is
+    /// unchanged, and nothing is mapped above it, so the order of all water is kept.
+    pub fn threshold(&self) -> f32 {
+        self.max_alpha - 0.005
+    }
+
     /// The shared mapping of an opacity (0..1): scaled, at most `max_alpha`, never below the
-    /// input.
+    /// input; water already at or above `max_alpha` is unchanged.
     pub fn mapped(&self, a: f32, a_max: f32) -> f32 {
-        (a * self.scale(a_max)).min(self.max_alpha).max(a)
+        if self.at_or_above_max(a) {
+            return a;
+        }
+        (a * self.scale(a_max)).min(self.threshold()).max(a)
     }
 
     /// The opacity (0..1) a material of opacity `a` on `surface` gets: the mapped opacity, at

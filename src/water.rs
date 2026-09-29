@@ -111,7 +111,7 @@ pub fn patch_dl(
 }
 
 /// The opacity that maps to `max_alpha`: the config's `a_max`, else the most opaque water
-/// material of the configured surfaces below `max_alpha`.
+/// material of the configured surfaces below `max_alpha` (water at or above it never sets it).
 pub fn a_max(archive: &mut Archive, config: &Config) -> Result<f32> {
     if let Some(a) = config.a_max {
         return Ok(a);
@@ -122,7 +122,7 @@ pub fn a_max(archive: &mut Archive, config: &Config) -> Result<f32> {
         let bytes = archive.read(&s.dl)?;
         let (_, changes) = patch_dl(&s.dl, &bytes, &water, |a| a)?;
         for c in changes {
-            if (c.from as f32 / 255.0) < config.max_alpha {
+            if !config.at_or_above_max(c.from as f32 / 255.0) {
                 best = best.max(c.from);
             }
         }

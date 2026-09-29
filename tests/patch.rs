@@ -125,17 +125,21 @@ fn the_mapping_lifts_every_surface_keeps_ratios_and_order_and_never_exceeds_max_
         let m = c.mapped(a, a_max);
         assert!(m >= prev, "order lost at {a}");
         prev = m;
-        if a < c.max_alpha {
+        if !c.at_or_above_max(a) {
             assert!(m > a, "{a} not lifted");
             assert!(m <= c.max_alpha + 1e-6, "{a} -> {m}");
         } else {
-            assert_eq!(m, a, "water above max_alpha keeps its value");
+            assert_eq!(m, a, "water at or above max_alpha keeps its value");
         }
     }
-    // Ratios: 0.39 / 0.50 is kept, and a_max lands on max_alpha.
-    let (p, d) = (c.mapped(0.39, a_max), c.mapped(0.50, a_max));
+    // Ratios: 0.39 / 0.45 is kept, and a_max lands on max_alpha (within half a percent).
+    let (p, q, d) = (
+        c.mapped(0.39, a_max),
+        c.mapped(0.45, a_max),
+        c.mapped(0.50, a_max),
+    );
     assert!(
-        (p / d - 0.39 / 0.50).abs() < 1e-5 && (d - 0.70).abs() < 1e-6,
+        (p / q - 0.39 / 0.45).abs() < 1e-5 && (d - 0.70).abs() <= 0.005 + 1e-6,
         "{p} {d}"
     );
     assert!((p - 0.546).abs() < 1e-3, "Kokiri pond {p}");
@@ -190,4 +194,16 @@ fn every_display_list_of_a_game_archive_round_trips() {
         n += 1;
     }
     assert!(n > 1000, "{n} display lists");
+}
+
+#[test]
+fn water_at_or_above_max_alpha_is_never_changed() {
+    let c = config(0.70);
+    for byte in [178u8, 179, 204, 230] {
+        let a = byte as f32 / 255.0;
+        assert!(c.at_or_above_max(a), "{a}");
+        assert_eq!(c.mapped(a, 0.5), a);
+        assert_eq!(c.target(&surface(None), byte, 0.5), byte);
+    }
+    assert!(!c.at_or_above_max(166.0 / 255.0));
 }
