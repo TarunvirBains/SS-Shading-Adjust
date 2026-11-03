@@ -20,6 +20,10 @@ pub struct Config {
     pub water: Water,
     /// Ground tint (`[ground]`).
     pub ground: Option<crate::ground::Ground>,
+    /// Foliage warmth (`[foliage]`).
+    pub foliage: Option<crate::foliage::Foliage>,
+    /// Scene lighting warmth (`[lighting]`).
+    pub lighting: Option<crate::lighting::Lighting>,
     /// Lava glow (`[lava]`).
     pub lava: Option<crate::lava::Lava>,
 }
@@ -33,6 +37,12 @@ impl Config {
         c.water.validate()?;
         if let Some(g) = &c.ground {
             g.validate()?;
+        }
+        if let Some(f) = &c.foliage {
+            f.validate()?;
+        }
+        if let Some(l) = &c.lighting {
+            l.validate()?;
         }
         if let Some(l) = &c.lava {
             l.validate()?;

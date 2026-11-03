@@ -215,6 +215,105 @@ fn run(cli: Cli) -> anyhow::Result<ExitCode> {
                     );
                 }
             }
+            if let Some(f) = full.foliage.as_ref().filter(|f| f.enabled) {
+                let names = archive.names();
+                for scene in f.scenes.iter().filter(|s| s.enabled) {
+                    let leaves = ss_shading_adjust::foliage::leaf_set(scene);
+                    let (mut patched, mut skipped) = (0, 0);
+                    for name in names
+                        .iter()
+                        .filter(|n| ss_shading_adjust::glob::matches(&scene.dls, n))
+                    {
+                        let bytes = match entries.get(name) {
+                            Some(b) => b.clone(),
+                            None => archive.read(name)?,
+                        };
+                        if !ss_shading_adjust::dl::is_dl(&bytes) {
+                            continue;
+                        }
+                        let (out, changes) =
+                            ss_shading_adjust::foliage::patch_dl(name, &bytes, &leaves, |v| {
+                                f.tint(v)
+                            })?;
+                        for c in &changes {
+                            println!(
+                                "foliage {}: {} @{:#x}: prim {:08x} -> {:08x} ({} tris){}",
+                                scene.name,
+                                c.dl,
+                                c.offset,
+                                c.from,
+                                c.to,
+                                c.tris,
+                                if c.skipped.is_empty() {
+                                    String::new()
+                                } else {
+                                    format!(" SKIPPED: {}", c.skipped)
+                                }
+                            );
+                            if c.skipped.is_empty() {
+                                patched += 1;
+                            } else {
+                                skipped += 1;
+                            }
+                        }
+                        if out != bytes {
+                            entries.insert(name.clone(), out);
+                        }
+                    }
+                    println!(
+                        "foliage {}: {patched} primitive colors patched, {skipped} skipped",
+                        scene.name
+                    );
+                }
+            }
+            if let Some(l) = full.lighting.as_ref().filter(|l| l.enabled) {
+                let names = archive.names();
+                for scene in l.scenes.iter().filter(|s| s.enabled) {
+                    let (mut warmed, mut kept) = (0, 0);
+                    for name in names
+                        .iter()
+                        .filter(|n| ss_shading_adjust::glob::matches(&scene.resources, n))
+                    {
+                        let bytes = match entries.get(name) {
+                            Some(b) => b.clone(),
+                            None => archive.read(name)?,
+                        };
+                        let (out, changes) =
+                            ss_shading_adjust::lighting::patch_resource(name, &bytes, l)?;
+                        for c in &changes {
+                            println!(
+                                "lighting {}: {} entry {}: ambient {:02x}{:02x}{:02x} -> {:02x}{:02x}{:02x}{}",
+                                scene.name,
+                                c.resource,
+                                c.index,
+                                c.from[0],
+                                c.from[1],
+                                c.from[2],
+                                c.to[0],
+                                c.to[1],
+                                c.to[2],
+                                if c.kept.is_empty() {
+                                    String::new()
+                                } else {
+                                    format!(" KEPT: {}", c.kept)
+                                }
+                            );
+                            if c.kept.is_empty() {
+                                warmed += 1;
+                            } else {
+                                kept += 1;
+                            }
+                        }
+                        if out != bytes {
+                            entries.insert(name.clone(), out);
+                        }
+                    }
+                    println!(
+                        "lighting {}: {warmed} entries warmed, {kept} kept",
+                        scene.name
+                    );
+                }
+            }
             if let Some(l) = full.lava.as_ref().filter(|l| l.enabled) {
                 let names = archive.names();
                 for scene in l.scenes.iter().filter(|s| s.enabled) {

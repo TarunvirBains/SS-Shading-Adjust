@@ -1,0 +1,584 @@
+# SS Shading Adjust: engine-side look adjustments for Ocarina of Time (Ship of Harkinian).
+# One section per adjustment; the build patches only what a section lists.
+#
+# [water] Deeper water: which water surfaces get a more opaque primitive alpha, and how much.
+#
+# Mapping: proportional. Every patched water material's opacity a becomes a * max_alpha / a_max:
+# every surface gets more opaque, the ratios between surfaces (the water's dynamic range) stay,
+# and water as opaque as a_max lands on max_alpha. Nothing goes above max_alpha; water already at
+# or above it keeps its value; nothing is ever made less opaque. A surface's own max_alpha
+# (gameplay: seeing Link, items, enemies and the floor below) caps it further.
+#
+# max_alpha 0.70: a translucent surface of opacity a shows a submerged object of contrast C
+# against the floor with contrast (1 - a) * C. Link, items and enemies against the floor have
+# C ~ 0.4-0.5 (OKLab L); at 0.70 that is 0.12-0.15 on screen, clearly above the +-0.1 flicker of
+# the scrolling caustics (at 0.80 it drops under it). The game's own most opaque non-diving water
+# sits at 0.70-0.80 (Zora's Domain falls, Forest Temple wells, Ice Cavern puddles).
+[water]
+max_alpha = 0.80
+mapping = "proportional"
+# a_max: the opacity that maps to max_alpha. 0.50 (most water sits at 0.39-0.50): scale 1.40, pond
+# 0.39 -> 0.55, everything from 0.50 up at 0.70 (gameplay limits still apply). Unset, it is
+# measured: the most opaque patched water below max_alpha, the Desert Colossus oasis at 0.65
+# (scale 1.08). Water already at or above max_alpha (within half a percent) keeps its value and
+# never sets the scale: the Ice Cavern and Forest Temple wells at 0.80, Zora's Domain's falls at
+# 0.70.
+a_max = 0.50
+
+# Texture resource paths that are water (from the fluid audit of the texture pack plus the
+# translucent materials of oot.o2r labeled by eye). A material drawing one of these is a water
+# surface; only its primitive alpha changes, and never downward.
+water_textures = [
+    "objects/object_bdan_objects/gJabuObjectsTex_03498",
+    "objects/object_blkobj/object_blkobjTex_00A090",
+    "objects/object_fish/gFishingAquariumWaterTex",
+    "objects/object_hakach_objects/gBotwWater1Tex",
+    "objects/object_mizu_objects/object_mizu_objectsTex_007520",
+    "objects/object_mori_tex/gMoriWaterTex",
+    "objects/object_spot01_objects/gKakarikoWellWaterTex",
+    "objects/object_spot06_objects/gLakeHyliaWaterTex",
+    "objects/object_spot07_object/object_spot07_object_Tex_0025E0",
+    "objects/object_spot07_object/object_spot07_object_Tex_003930",
+    "objects/object_spot07_object/object_spot07_object_Tex_005530",
+    "objects/object_spot11_obj/gDesertColossusOasisWaterTex",
+    "objects/object_ydan_objects/gYdanHasiWaterTex",
+    "scenes/nonmq/Bmori1_scene/Bmori1_room_7Tex_010FD8",
+    "scenes/nonmq/Bmori1_scene/Bmori1_room_8Tex_014AB0",
+    "scenes/nonmq/MIZUsin_scene/MIZUsin_room_0Tex_015428",
+    "scenes/nonmq/MIZUsin_scene/MIZUsin_room_12Tex_006628",
+    "scenes/nonmq/MIZUsin_scene/MIZUsin_room_21Tex_006CA0",
+    "scenes/nonmq/MIZUsin_scene/MIZUsin_room_2Tex_005488",
+    "scenes/nonmq/MIZUsin_scene/MIZUsin_room_5Tex_009E38",
+    "scenes/nonmq/MIZUsin_scene/MIZUsin_room_8Tex_00D578",
+    "scenes/nonmq/MIZUsin_scene/MIZUsin_room_9Tex_0078A8",
+    "scenes/nonmq/bdan_scene/bdan_sceneTex_015200",
+    "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_10Tex_003BD8",
+    "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_1Tex_009110",
+    "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_1Tex_00BD30",
+    "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_3Tex_003208",
+    "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_4Tex_0030E0",
+    "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_7Tex_0050E8",
+    "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_9Tex_006CA0",
+    "scenes/nonmq/ice_doukutu_scene/ice_doukutu_sceneTex_0108C0",
+    "scenes/nonmq/men_scene/men_room_9Tex_003070",
+    "scenes/nonmq/ydan_scene/ydan_room_0Tex_013F48",
+    "scenes/nonmq/ydan_scene/ydan_room_3Tex_012DB0",
+    "scenes/nonmq/ydan_scene/ydan_room_9Tex_008498",
+    "scenes/shared/bdan_boss_scene/bdan_boss_room_0Tex_002C18",
+    "scenes/shared/daiyousei_izumi_scene/daiyousei_izumi_sceneTex_00C000",
+    "scenes/shared/hairal_niwa_n_scene/hairal_niwa_n_sceneTex_0018F0",
+    "scenes/shared/hairal_niwa_scene/hairal_niwa_sceneTex_004B90",
+    "scenes/shared/hakaana2_scene/hakaana2_sceneTex_00B890",
+    "scenes/shared/hylia_labo_scene/hylia_labo_sceneTex_00E090",
+    "scenes/shared/kakusiana_scene/kakusiana_room_0Tex_006AA0",
+    "scenes/shared/kakusiana_scene/kakusiana_room_10Tex_005228",
+    "scenes/shared/kakusiana_scene/kakusiana_room_3Tex_004930",
+    "scenes/shared/kakusiana_scene/kakusiana_room_5Tex_003ED8",
+    "scenes/shared/kenjyanoma_scene/kenjyanoma_room_0Tex_00D618",
+    "scenes/shared/nakaniwa_scene/nakaniwa_room_0Tex_0166C0",
+    "scenes/shared/souko_scene/souko_room_1Tex_009F28",
+    "scenes/shared/spot00_scene/spot00_sceneTex_020818",
+    "scenes/shared/spot03_scene/spot03_sceneTex_008D58",
+    "scenes/shared/spot04_scene/spot04_room_0Tex_018A90",
+    "scenes/shared/spot05_scene/spot05_sceneTex_010360",
+    "scenes/shared/spot06_scene/spot06_sceneTex_0170B8",
+    "scenes/shared/spot08_scene/spot08_sceneTex_0061A0",
+    "scenes/shared/spot08_scene/spot08_sceneTex_010EA0",
+    "scenes/shared/spot09_scene/spot09_sceneTex_00E160",
+    "scenes/shared/spot10_scene/spot10_room_3Tex_0052A8",
+    "scenes/shared/spot15_scene/spot15_sceneTex_017C00",
+    "scenes/shared/turibori_scene/turibori_sceneTex_00E4E0",
+    "scenes/shared/ydan_boss_scene/ydan_boss_room_0Tex_005BF0",
+    "scenes/shared/yousei_izumi_tate_scene/yousei_izumi_tate_sceneTex_007010",
+    "scenes/shared/yousei_izumi_yoko_scene/yousei_izumi_yoko_sceneTex_00ADA0",
+]
+
+# Not patched (vanilla opacity kept, gameplay needs to see below or through):
+#   Water Temple (MIZUsin rooms, the water-level actor gObjectMizuObjectsWaterDL_004B20),
+#   Jabu-Jabu's Belly and Barinade (bdan, gJabuWaterDL), Gerudo Training Ground's diving room
+#   (men_room_9), the Lakeside Laboratory diving tank (hylia_labo), the fishing pond and its
+#   tank (turibori, gFishingAquariumContainerDL), the Forest Temple wells (Bmori1 rooms 7/8, at
+#   0.80 already; gMoriIdomizuWaterDL), Dark Link's water floor (gIllusionRoomNormalDL), and the
+#   debug test scene (test01).
+
+# Deku Tree B1: the pond you dive into, switches and the tunnel below: lower
+[[water.surface]]
+dl = "objects/object_ydan_objects/gDTWaterPlaneDL"
+max_alpha = 0.55
+reason = "Deku Tree B1: the pond you dive into, switches and the tunnel below: lower"
+[[water.surface]]
+dl = "scenes/nonmq/ydan_scene/ydan_room_0DL_012DD0"
+max_alpha = 0.55
+reason = "Deku Tree B1: the pond you dive into, switches and the tunnel below: lower"
+[[water.surface]]
+dl = "scenes/nonmq/ydan_scene/ydan_room_3DL_010B38"
+max_alpha = 0.55
+reason = "Deku Tree B1: the pond you dive into, switches and the tunnel below: lower"
+[[water.surface]]
+dl = "scenes/nonmq/ydan_scene/ydan_room_3DL_011C58"
+max_alpha = 0.55
+reason = "Deku Tree B1: the pond you dive into, switches and the tunnel below: lower"
+[[water.surface]]
+dl = "scenes/nonmq/ydan_scene/ydan_room_9DL_0070E0"
+max_alpha = 0.55
+reason = "Deku Tree B1: the pond you dive into, switches and the tunnel below: lower"
+
+# Desert Colossus oasis: shallow
+[[water.surface]]
+dl = "objects/object_spot11_obj/gDesertColossusOasisDL"
+reason = "Desert Colossus oasis: shallow"
+
+# Gerudo Valley river: fast water, nothing below to see
+[[water.surface]]
+dl = "scenes/shared/spot09_scene/spot09_room_0DL_007390"
+reason = "Gerudo Valley river: fast water, nothing below to see"
+[[water.surface]]
+dl = "scenes/shared/spot09_scene/spot09_room_0DL_008318"
+reason = "Gerudo Valley river: fast water, nothing below to see"
+[[water.surface]]
+dl = "scenes/shared/spot09_scene/spot09_room_0Set_000500DL_008318"
+reason = "Gerudo Valley river: fast water, nothing below to see"
+[[water.surface]]
+dl = "scenes/shared/spot09_scene/spot09_room_0Set_000890DL_008318"
+reason = "Gerudo Valley river: fast water, nothing below to see"
+[[water.surface]]
+dl = "scenes/shared/spot09_scene/spot09_room_0Set_000960DL_008318"
+reason = "Gerudo Valley river: fast water, nothing below to see"
+[[water.surface]]
+dl = "scenes/shared/spot09_scene/spot09_room_0Set_000A80DL_008318"
+reason = "Gerudo Valley river: fast water, nothing below to see"
+
+# Hyrule Castle moat and courtyard water: no diving
+[[water.surface]]
+dl = "scenes/shared/hairal_niwa_n_scene/hairal_niwa_n_room_0DL_003190"
+reason = "Hyrule Castle moat and courtyard water: no diving"
+[[water.surface]]
+dl = "scenes/shared/hairal_niwa_n_scene/hairal_niwa_n_room_0DL_0034F8"
+reason = "Hyrule Castle moat and courtyard water: no diving"
+[[water.surface]]
+dl = "scenes/shared/hairal_niwa_scene/hairal_niwa_room_0DL_0095E0"
+reason = "Hyrule Castle moat and courtyard water: no diving"
+[[water.surface]]
+dl = "scenes/shared/hairal_niwa_scene/hairal_niwa_room_0DL_009958"
+reason = "Hyrule Castle moat and courtyard water: no diving"
+[[water.surface]]
+dl = "scenes/shared/hairal_niwa_scene/hairal_niwa_room_0DL_00A2E8"
+reason = "Hyrule Castle moat and courtyard water: no diving"
+[[water.surface]]
+dl = "scenes/shared/nakaniwa_scene/nakaniwa_room_0DL_0142E0"
+reason = "Hyrule Castle moat and courtyard water: no diving"
+[[water.surface]]
+dl = "scenes/shared/spot15_scene/spot15_room_0DL_00CE90"
+reason = "Hyrule Castle moat and courtyard water: no diving"
+[[water.surface]]
+dl = "scenes/shared/spot15_scene/spot15_room_0DL_00D098"
+reason = "Hyrule Castle moat and courtyard water: no diving"
+
+# Hyrule Field river and castle moat: shallow, no diving
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_000770DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_000770DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_000C50DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_000C50DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001120DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001120DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_0011F0DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_0011F0DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_0012C0DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_0012C0DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001360DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001360DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001570DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001570DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_0018D0DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_0018D0DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001920DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001920DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001C80DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001C80DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001CF0DL_014E28"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+[[water.surface]]
+dl = "scenes/shared/spot00_scene/spot00_room_0Set_001CF0DL_015100"
+reason = "Hyrule Field river and castle moat: shallow, no diving"
+
+# Ice Cavern pools: lower
+[[water.surface]]
+dl = "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_10DL_003AF0"
+max_alpha = 0.55
+reason = "Ice Cavern pools: lower"
+[[water.surface]]
+dl = "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_1DL_009B58"
+max_alpha = 0.55
+reason = "Ice Cavern pools: lower"
+[[water.surface]]
+dl = "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_1DL_00A760"
+max_alpha = 0.55
+reason = "Ice Cavern pools: lower"
+[[water.surface]]
+dl = "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_7DL_0030B0"
+max_alpha = 0.55
+reason = "Ice Cavern pools: lower"
+[[water.surface]]
+dl = "scenes/nonmq/ice_doukutu_scene/ice_doukutu_room_7DL_003FD0"
+max_alpha = 0.55
+reason = "Ice Cavern pools: lower"
+
+# Kakariko well: the entrance to Bottom of the Well must stay readable
+[[water.surface]]
+dl = "objects/object_spot01_objects/gKakarikoWellWaterDL"
+max_alpha = 0.55
+reason = "Kakariko well: the entrance to Bottom of the Well must stay readable"
+
+# Kokiri Forest pond: decorative, nothing to find below
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_0006B0DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_000940DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_000BA0DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_000BD0DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_000C00DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_000C30DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_000E60DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_000ED0DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_000F40DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_000F80DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_0011F0DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+[[water.surface]]
+dl = "scenes/shared/spot04_scene/spot04_room_0Set_001240DL_017BD0"
+reason = "Kokiri Forest pond: decorative, nothing to find below"
+
+# Lake Hylia (and the Water Temple entrance): diving, iron boots, the heart piece: lowest raise
+[[water.surface]]
+dl = "objects/object_spot06_objects/gLakeHyliaHighWaterDL"
+max_alpha = 0.50
+reason = "Lake Hylia (and the Water Temple entrance): diving, iron boots, the heart piece: lowest raise"
+[[water.surface]]
+dl = "objects/object_spot06_objects/gLakeHyliaLowWaterDL"
+max_alpha = 0.50
+reason = "Lake Hylia (and the Water Temple entrance): diving, iron boots, the heart piece: lowest raise"
+
+# Lost Woods pool: the swim-through to Zora's River must stay visible
+[[water.surface]]
+dl = "scenes/shared/spot10_scene/spot10_room_3DL_0051C0"
+max_alpha = 0.55
+reason = "Lost Woods pool: the swim-through to Zora's River must stay visible"
+
+# Sacred Forest Meadow pool: decorative
+[[water.surface]]
+dl = "scenes/shared/spot05_scene/spot05_room_0DL_009DF0"
+reason = "Sacred Forest Meadow pool: decorative"
+[[water.surface]]
+dl = "scenes/shared/spot05_scene/spot05_room_0Set_000340DL_009DF0"
+reason = "Sacred Forest Meadow pool: decorative"
+[[water.surface]]
+dl = "scenes/shared/spot05_scene/spot05_room_0Set_000530DL_009DF0"
+reason = "Sacred Forest Meadow pool: decorative"
+[[water.surface]]
+dl = "scenes/shared/spot05_scene/spot05_room_0Set_0005D0DL_009DF0"
+reason = "Sacred Forest Meadow pool: decorative"
+
+# Zora's Domain: diving game, the Lake Hylia tunnel: lower
+[[water.surface]]
+dl = "objects/object_spot07_object/object_spot07_object_DL_000460"
+max_alpha = 0.55
+reason = "Zora's Domain: diving game, the Lake Hylia tunnel: lower"
+[[water.surface]]
+dl = "objects/object_spot07_object/object_spot07_object_DL_000BE0"
+max_alpha = 0.55
+reason = "Zora's Domain: diving game, the Lake Hylia tunnel: lower"
+[[water.surface]]
+dl = "objects/object_spot07_object/object_spot07_object_DL_001F68"
+max_alpha = 0.55
+reason = "Zora's Domain: diving game, the Lake Hylia tunnel: lower"
+[[water.surface]]
+dl = "objects/object_spot07_object/object_spot07_object_DL_0032D8"
+max_alpha = 0.55
+reason = "Zora's Domain: diving game, the Lake Hylia tunnel: lower"
+
+# Zora's Fountain / Jabu-Jabu entrance: diving, the Jabu platform: lower
+[[water.surface]]
+dl = "scenes/shared/spot08_scene/spot08_room_0DL_007FE8"
+max_alpha = 0.55
+reason = "Zora's Fountain / Jabu-Jabu entrance: diving, the Jabu platform: lower"
+[[water.surface]]
+dl = "scenes/shared/spot08_scene/spot08_room_0Set_000330DL_007FE8"
+max_alpha = 0.55
+reason = "Zora's Fountain / Jabu-Jabu entrance: diving, the Jabu platform: lower"
+[[water.surface]]
+dl = "scenes/shared/spot08_scene/spot08_room_0Set_000700DL_007FE8"
+max_alpha = 0.55
+reason = "Zora's Fountain / Jabu-Jabu entrance: diving, the Jabu platform: lower"
+[[water.surface]]
+dl = "scenes/shared/spot08_scene/spot08_room_0Set_0008E0DL_007FE8"
+max_alpha = 0.55
+reason = "Zora's Fountain / Jabu-Jabu entrance: diving, the Jabu platform: lower"
+[[water.surface]]
+dl = "scenes/shared/spot08_scene/spot08_room_0Set_0009A0DL_007FE8"
+max_alpha = 0.55
+reason = "Zora's Fountain / Jabu-Jabu entrance: diving, the Jabu platform: lower"
+[[water.surface]]
+dl = "scenes/shared/spot08_scene/spot08_room_0Set_000AD0DL_007FE8"
+max_alpha = 0.55
+reason = "Zora's Fountain / Jabu-Jabu entrance: diving, the Jabu platform: lower"
+
+# Zora's River: swimming and a few dives (grotto, frogs): lower
+[[water.surface]]
+dl = "scenes/shared/spot03_scene/spot03_room_0DL_00CEB0"
+max_alpha = 0.60
+reason = "Zora's River: swimming and a few dives (grotto, frogs): lower"
+[[water.surface]]
+dl = "scenes/shared/spot03_scene/spot03_room_0Set_000580DL_00CEB0"
+max_alpha = 0.60
+reason = "Zora's River: swimming and a few dives (grotto, frogs): lower"
+[[water.surface]]
+dl = "scenes/shared/spot03_scene/spot03_room_1DL_007210"
+max_alpha = 0.60
+reason = "Zora's River: swimming and a few dives (grotto, frogs): lower"
+[[water.surface]]
+dl = "scenes/shared/spot03_scene/spot03_room_1Set_0001E0DL_007210"
+max_alpha = 0.60
+reason = "Zora's River: swimming and a few dives (grotto, frogs): lower"
+
+# fairy fountains: glowing water, decorative
+[[water.surface]]
+dl = "scenes/shared/daiyousei_izumi_scene/daiyousei_izumi_room_0DL_0034A0"
+reason = "fairy fountains: glowing water, decorative"
+[[water.surface]]
+dl = "scenes/shared/hakaana2_scene/hakaana2_room_0DL_006310"
+reason = "fairy fountains: glowing water, decorative"
+[[water.surface]]
+dl = "scenes/shared/yousei_izumi_tate_scene/yousei_izumi_tate_room_0DL_003FB0"
+reason = "fairy fountains: glowing water, decorative"
+[[water.surface]]
+dl = "scenes/shared/yousei_izumi_yoko_scene/yousei_izumi_yoko_room_0DL_003AD0"
+reason = "fairy fountains: glowing water, decorative"
+
+# grotto pools (one hides a heart piece under water): lower
+[[water.surface]]
+dl = "scenes/shared/kakusiana_scene/kakusiana_room_0DL_006838"
+max_alpha = 0.55
+reason = "grotto pools (one hides a heart piece under water): lower"
+[[water.surface]]
+dl = "scenes/shared/kakusiana_scene/kakusiana_room_10DL_004FB8"
+max_alpha = 0.55
+reason = "grotto pools (one hides a heart piece under water): lower"
+[[water.surface]]
+dl = "scenes/shared/kakusiana_scene/kakusiana_room_3DL_003BC8"
+max_alpha = 0.55
+reason = "grotto pools (one hides a heart piece under water): lower"
+[[water.surface]]
+dl = "scenes/shared/kakusiana_scene/kakusiana_room_5DL_003C68"
+max_alpha = 0.55
+reason = "grotto pools (one hides a heart piece under water): lower"
+
+# shallow decorative water
+[[water.surface]]
+dl = "scenes/shared/souko_scene/souko_room_1DL_009B08"
+reason = "shallow decorative water"
+
+# [ground] Ground tint: Skyward Sword's Faron Woods reads its paths as warm terracotta; OoT's
+# Kokiri Forest paths are gray textures times the scene lighting times an olive primitive color
+# (9b8c34). Earth materials of the form texture x shade x PRIM get a warmer primitive color: its
+# OKLab lightness is kept exactly (the path stays as light as vanilla, under every light and time
+# of day) and its a/b move toward the target, `strength` of the way. Nothing else changes.
+#
+# Target: hue 50 (terracotta, between the brief's rose-sienna 40-50 and the terracotta mock the
+# user liked, mock-a.png: paths h 58-61, C 0.08-0.09 on screen); on-screen chroma 0.085 (the mock;
+# SS Faron earth measures C 0.07-0.08 at h 61-63). Strength: test builds a = 0.5, b = 0.85.
+[ground]
+enabled = true
+target_hue = 50.0
+target_chroma = 0.085
+strength = 0.7
+
+# Kokiri Forest (spot04): the paths and bare earth. Materials: 019A90 and 019290 (room 0),
+# 00F218 (scene), 007D78 (room 1), all texture x shade x PRIM with PRIM 9b8c34 (00F218: also
+# 826e3c). Not earth: 014B08 (clover ground, the grass), 01A290 (black/white fade), 01A490/
+# 01AC90/01AE90 (the painted decals). texture_lightness: the PastelPlash v6c textures (gray, L
+# p50 0.845).
+[[ground.scene]]
+name = "Kokiri Forest"
+dls = "scenes/shared/spot04_scene/*DL_*"
+textures = [
+    "scenes/shared/spot04_scene/spot04_room_0Tex_019A90",
+    "scenes/shared/spot04_scene/spot04_room_0Tex_019290",
+    "scenes/shared/spot04_scene/spot04_sceneTex_00F218",
+    "scenes/shared/spot04_scene/spot04_room_1Tex_007D78",
+]
+texture_lightness = 0.845
+
+# [lava] Lava glow: Skyward Sword's Eldin lava glows orange-yellow with bright veins; Ocarina of
+# Time's lava materials draw a deep red texture (OoT Reloaded: L 0.36, C 0.15, h 29) times the
+# vertex colors (baked light, near white) or the scene's environment color, and read flat. The
+# lava materials' combiner gains an additive glow after the lighting term: red moves toward
+# orange, the veins toward yellow, and every shading difference (vertex light, the animated
+# crust blend, the crater's pulsing environment color) stays. Rock and platforms are other
+# materials and are untouched, so lava versus rock stays obvious. The textures stay as the
+# texture pack (and PastelPlash, which keeps lava's glow and heat colors) made them.
+[lava]
+enabled = true
+# The glow at strength 1 (0..1 per channel, as the combiner adds it); strength scales it.
+glow = [0.30, 0.24, 0.02]
+strength = 0.9
+
+[[lava.scene]]
+name = "Fire Temple"
+dls = "scenes/nonmq/HIDAN_scene/*DL_*"
+textures = [
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_1Tex_00C130",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_2Tex_00E428",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_6Tex_006790",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_8Tex_0092D8",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_10Tex_017018",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_16Tex_009DE0",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_21Tex_007478",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_21Tex_007C78",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_24Tex_004D38",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_26Tex_005898",
+    "scenes/nonmq/HIDAN_scene/HIDAN_room_26Tex_006098",
+]
+
+[[lava.scene]]
+name = "Volvagia's arena"
+dls = "scenes/shared/FIRE_bs_scene/*DL_*"
+textures = [
+    "scenes/shared/FIRE_bs_scene/FIRE_bs_room_1Tex_0065D8",
+    "scenes/shared/FIRE_bs_scene/FIRE_bs_sceneTex_003C00",
+]
+
+[[lava.scene]]
+name = "Death Mountain Crater"
+dls = "scenes/shared/spot17_scene/*DL_*"
+textures = [
+    "scenes/shared/spot17_scene/spot17_room_1Tex_00CBD8",
+    "scenes/shared/spot17_scene/spot17_room_1Tex_00D3D8",
+]
+
+[[lava.scene]]
+name = "Dodongo's Cavern"
+dls = "scenes/nonmq/ddan_scene/*DL_*"
+textures = ["scenes/nonmq/ddan_scene/ddan_room_16Tex_002158"]
+
+[[lava.scene]]
+name = "King Dodongo's arena"
+dls = "scenes/shared/ddan_boss_scene/*DL_*"
+textures = ["scenes/shared/ddan_boss_scene/gDodongosCavernBossLavaFloorTex"]
+
+# [foliage] Foliage warmth: leaf and bush materials drawn as texture x shade x PRIM (either cycle
+# order) have a white PRIM that multiplies the lit texture. PRIM is multiplied by `tint`, scaled
+# by `strength` (1 - strength + strength * tint per channel): green leaves move toward warm
+# yellow-green, never lighter than before. Only the PRIM RGB bytes change. Kokiri Forest's grass
+# (a two-texture blend times the shade, no PRIM in its color path) is not handled: it would need
+# a combiner change, not a primitive-color change.
+[foliage]
+enabled = true
+tint = [1.0, 0.94, 0.62]
+strength = 0.5
+
+[[foliage.scene]]
+name = "Cuttable shrub"
+dls = "objects/gameplay_keep/*"
+textures = ["objects/gameplay_keep/gCuttableShrubLeafTFragmentTex"]
+
+[[foliage.scene]]
+name = "Shrub leaves (object_kusa)"
+dls = "objects/object_kusa/*"
+textures = ["objects/gameplay_keep/gCuttableShrubLeafTFragmentTex"]
+
+[[foliage.scene]]
+name = "Field bush and flower leaves"
+dls = "objects/gameplay_field_keep/*"
+textures = [
+    "objects/gameplay_field_keep/gFieldBushTex",
+    "objects/gameplay_field_keep/gHanaLeafTex",
+]
+
+# [lighting] Scene lighting warmth: a scene's Set_ resource holds its environment light settings,
+# one entry per time of day (ambient, two directional lights, fog). Daytime entries (ambient mean
+# brightness >= day_min_luma) get each color channel multiplied by 1 - strength + strength * tint:
+# warmer, never lighter. Night and dark entries, light directions and fog distances stay.
+[lighting]
+enabled = true
+day_min_luma = 0.28
+ambient_tint = [1.0, 0.95, 0.80]
+light_tint = [1.0, 0.96, 0.82]
+fog_tint = [1.0, 0.97, 0.88]
+strength = 0.5
+
+[[lighting.scene]]
+name = "Kokiri Forest"
+resources = "scenes/*/spot04_scene/spot04_sceneSet_*"
+
+[[lighting.scene]]
+name = "Hyrule Field"
+resources = "scenes/*/spot00_scene/spot00_sceneSet_*"

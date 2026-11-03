@@ -57,6 +57,32 @@ display lists, not textures, so it combines with texture packs (check with `conf
 Tests: `cargo test --release --locked`; set `OOT_O2R` to a game archive to also round-trip every
 display list in it.
 
+## `[foliage]`: warmer leaves
+
+Leaf and bush materials drawn as `texture x shade x PRIM` (either cycle order) have a white
+primitive color that multiplies the lit texture. It is multiplied by `tint`, scaled by
+`strength` (`1 - strength + strength * tint` per channel): green leaves move toward a warm
+yellow-green and never get lighter. Only the primitive-color RGB bytes change. Materials whose
+color path has no PRIM (for example Kokiri Forest's grass blend) are not handled.
+
+## `[lighting]`: warmer daylight
+
+A scene's `Set_` resource carries its environment light settings (command `0x0F`, a count, then
+22-byte entries: ambient, two directional lights, fog), one entry per time of day. Entries whose
+ambient mean brightness is at least `day_min_luma` get their ambient, light and fog colors
+multiplied by `1 - strength + strength * tint`; night and dark entries, light directions and fog
+distances stay. A resource without exactly one parseable lighting list is left alone.
+
+## Example config
+
+`ss-shading-adjust.warm.toml` is a warmer-look configuration using all five sections.
+
+## Sharing
+
+The built `.o2r` contains patched copies of the game's resources, which come from your own ROM.
+Do not redistribute it: share this source and your config, and let everyone build their own with
+`build oot.o2r SS-Shading-Adjust.o2r --config <config>`.
+
 ## License
 
 MIT OR Apache-2.0.
