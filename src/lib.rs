@@ -6,9 +6,11 @@
 pub mod config;
 pub mod crc64;
 pub mod dl;
+pub mod foliage;
 pub mod glob;
 pub mod ground;
 pub mod lava;
+pub mod lighting;
 pub mod material;
 pub mod o2r;
 pub mod vtx;
